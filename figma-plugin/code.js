@@ -700,6 +700,7 @@ async function runExport(ids, batchId, saveMode, lang) {
 // ---------------------------------------------------------------- messages
 
 var DOWNLOAD_URL = 'https://dobotibi.github.io/alleyoop/';
+var COFFEE_URL = 'https://ko-fi.com/dobotibi';
 
 figma.ui.onmessage = function (msg) {
   if (!msg || !msg.type) return;
@@ -708,6 +709,8 @@ figma.ui.onmessage = function (msg) {
     postSelection();
   } else if (msg.type === 'open-download') {
     figma.openExternal(DOWNLOAD_URL);
+  } else if (msg.type === 'open-coffee') {
+    figma.openExternal(COFFEE_URL);
   } else if (msg.type === 'set-save-mode') {
     if (msg.mode === 'default' || msg.mode === 'ask') {
       saveMode = msg.mode;

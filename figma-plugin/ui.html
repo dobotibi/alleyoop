@@ -49,6 +49,7 @@
   .lbl { color: var(--figma-color-text-secondary, #5f5f5f); }
   .batch { padding: 6px 8px; border-radius: 6px; border: 1px solid var(--figma-color-border, #ddd); word-break: break-word; }
   .batch.done { color: var(--figma-color-text-success, #14ae5c); }
+  button.coffee { width: 100%; margin-top: 2px; padding: 6px; background: transparent; border: 0; color: var(--figma-color-text-brand, #0d99ff); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   .batch.err { color: var(--figma-color-text-danger, #f24822); }
 </style>
 </head>
@@ -71,6 +72,7 @@
   <button class="main" id="sendBtn" disabled></button>
   <button class="sec hidden" id="zipBtn"></button>
   <button class="sec hidden" id="cancelBtn"></button>
+  <button class="coffee hidden" id="coffeeBtn" data-i18n="coffee"></button>
 
 <script>/*@@ZIP_JS_BEGIN@@*/
 // Minimal ZIP writer (STORE method, no compression). Dependency-free, ES2017.
@@ -237,6 +239,7 @@ if (typeof module !== "undefined") module.exports = { makeZip };
       cancel: 'Mégse (az aktuális frame után)',
       downNote: 'A Dunk nem érhető el. Letöltheted az exportot ZIP-ben, és később bedolgozhatod.',
       getDunk: 'Nincs még Dunk? Letöltés',
+      coffee: '☕ Időt spóroltál? Meghívhatsz egy kávéra',
       waiting: 'vár',
       exporting: 'exportál {done}/{total}',
       exportingPlain: 'exportál…',
@@ -303,6 +306,7 @@ if (typeof module !== "undefined") module.exports = { makeZip };
       cancel: 'Cancel (after the current frame)',
       downNote: 'Dunk is not reachable. You can download the export as a ZIP and import it later.',
       getDunk: 'No Dunk yet? Download it',
+      coffee: '☕ Saved you time? Buy me a coffee',
       waiting: 'waiting',
       exporting: 'exporting {done}/{total}',
       exportingPlain: 'exporting…',
@@ -468,6 +472,8 @@ if (typeof module !== "undefined") module.exports = { makeZip };
     zipBtn.disabled = !n;
     downNote.classList.toggle('hidden', up || running);
     $('getDunkBtn').classList.toggle('hidden', up || running);
+    var anyDone = !running && frames.some(function (f) { return statuses[f.id] && statuses[f.id].cls === 'done'; });
+    $('coffeeBtn').classList.toggle('hidden', !anyDone);
     cancelBtn.classList.toggle('hidden', !running || runMode === 'wait');
     modeLive.disabled = modeOutline.disabled = modeBoth.disabled = running;
     saveDefault.disabled = saveAsk.disabled = running;
@@ -718,6 +724,7 @@ if (typeof module !== "undefined") module.exports = { makeZip };
   sendBtn.onclick = function () { start('send'); };
   zipBtn.onclick = function () { start('zip'); };
   $('getDunkBtn').onclick = function () { post({ type: 'open-download' }); };
+  $('coffeeBtn').onclick = function () { post({ type: 'open-coffee' }); };
   cancelBtn.onclick = function () {
     cancelBtn.disabled = true;
     post({ type: 'cancel' });

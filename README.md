@@ -85,6 +85,10 @@ node tests/naming.test.js
 node tests/win/win-adapter.test.js
 ```
 
+## Support
+
+Alleyoop is free, and it stays free. If it saved you a few hours, you can buy me a coffee: **[ko-fi.com/dobotibi](https://ko-fi.com/dobotibi)**. It really helps me to keep it alive.
+
 ## Privacy
 
 Alleyoop and Dunk send nothing to the internet. The plugin only talks to Dunk on `localhost`. No analytics, no account. Details: [privacy](https://dobotibi.github.io/alleyoop/privacy.html).
