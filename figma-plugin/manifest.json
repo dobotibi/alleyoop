@@ -1,0 +1,20 @@
+{
+  "name": "Alleyoop",
+  "id": "neszetomi-plaza-dev",
+  "api": "1.0.0",
+  "editorType": [
+    "figma"
+  ],
+  "main": "code.js",
+  "ui": "ui.html",
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": [
+      "http://localhost:47800"
+    ],
+    "devAllowedDomains": [
+      "http://localhost:47800"
+    ],
+    "reasoning": "Alleyoop sends your exported frames to Dunk, a free helper app running on your own computer (localhost only). Dunk lets Adobe Illustrator build the .ai file. Nothing is sent to the internet."
+  }
+}

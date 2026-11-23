@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font: 12px/1.4 Inter, system-ui, -apple-system, sans-serif;
+    color: var(--figma-color-text, #222);
+    background: var(--figma-color-bg, #fff);
+    display: flex; flex-direction: column; padding: 12px; gap: 10px;
+  }
+  .status { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--figma-color-text-tertiary, #aaa); flex: none; }
+  .dot.ok { background: var(--figma-color-icon-success, #14ae5c); }
+  .dot.bad { background: var(--figma-color-icon-danger, #f24822); }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .seg { display: flex; border: 1px solid var(--figma-color-border, #ddd); border-radius: 6px; overflow: hidden; }
+  .seg button { border: 0; background: transparent; color: inherit; padding: 4px 8px; font: inherit; cursor: pointer; }
+  .seg button.on { background: var(--figma-color-bg-brand, #0d99ff); color: var(--figma-color-text-onbrand, #fff); }
+  .seg button:disabled { opacity: .5; cursor: default; }
+  .list { flex: 1; overflow-y: auto; border: 1px solid var(--figma-color-border, #ddd); border-radius: 6px; min-height: 0; }
+  .empty { padding: 16px; text-align: center; color: var(--figma-color-text-secondary, #5f5f5f); }
+  .frame { padding: 8px; border-bottom: 1px solid var(--figma-color-border, #eee); }
+  .frame:last-child { border-bottom: 0; }
+  .fname { font-weight: 600; word-break: break-word; }
+  .meta { color: var(--figma-color-text-secondary, #5f5f5f); }
+  .st { margin-top: 2px; word-break: break-word; }
+  .st.done { color: var(--figma-color-text-success, #14ae5c); }
+  .st.err { color: var(--figma-color-text-danger, #f24822); }
+  details { margin-top: 4px; }
+  summary { cursor: pointer; color: var(--figma-color-text-secondary, #5f5f5f); }
+  ul { margin: 4px 0 0; padding-left: 16px; }
+  li.warn { color: var(--figma-color-text-warning, #8a5300); }
+  li.info { color: var(--figma-color-text-secondary, #5f5f5f); }
+  button.main, button.sec {
+    width: 100%; padding: 8px; border-radius: 6px; font: inherit; font-weight: 600; cursor: pointer;
+  }
+  button.main { border: 0; background: var(--figma-color-bg-brand, #0d99ff); color: var(--figma-color-text-onbrand, #fff); }
+  button.sec { border: 1px solid var(--figma-color-border, #ccc); background: transparent; color: inherit; }
+  button:disabled { opacity: .45; cursor: default; }
+  .hidden { display: none !important; }
+  .note { color: var(--figma-color-text-secondary, #5f5f5f); }
+  .seg.full { width: 100%; }
+  .seg.full button { flex: 1 1 0; min-width: 0; padding: 4px 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .seg button.on:disabled { opacity: .7; }
+  .col { display: flex; flex-direction: column; gap: 4px; }
+  .lbl { color: var(--figma-color-text-secondary, #5f5f5f); }
+  .batch { padding: 6px 8px; border-radius: 6px; border: 1px solid var(--figma-color-border, #ddd); word-break: break-word; }
+  .batch.done { color: var(--figma-color-text-success, #14ae5c); }
+  .batch.err { color: var(--figma-color-text-danger, #f24822); }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="status"><span class="dot" id="dot"></span><span id="statusText"></span></div>
+    <div class="seg"><button id="langHu">HU</button><button id="langEn">EN</button></div>
+  </div>
+  <div class="col"><span class="lbl" data-i18n="textLabel"></span>
+    <div class="seg full"><button id="modeLive"></button><button id="modeOutline"></button><button id="modeBoth"></button></div>
+  </div>
+  <div class="col"><span class="lbl" data-i18n="saveLabel"></span>
+    <div class="seg full"><button id="saveDefault"></button><button id="saveAsk"></button></div>
+    <span class="note" id="saveHint"></span>
+  </div>
+  <div class="list" id="list"></div>
+  <div id="batchMsg" class="batch hidden"></div>
+  <div id="downNote" class="note hidden" data-i18n="downNote"></div>
+  <button class="sec hidden" id="getDunkBtn" data-i18n="getDunk"></button>
+  <button class="main" id="sendBtn" disabled></button>
+  <button class="sec hidden" id="zipBtn"></button>
+  <button class="sec hidden" id="cancelBtn"></button>
+
+<script>/*@@ZIP_JS_BEGIN@@*/
+// Minimal ZIP writer (STORE method, no compression). Dependency-free, ES2017.
+// files: [{ name: string (may contain "/" and UTF-8), data: Uint8Array }]
+// returns: Uint8Array containing a valid .zip archive.
+function makeZip(files) {
+  // CRC32 table (IEEE polynomial)
+  var crcTable = new Uint32Array(256);
+  for (var n = 0; n < 256; n++) {
+    var c = n;
+    for (var k = 0; k < 8; k++) {
+      c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+    }
+    crcTable[n] = c >>> 0;
+  }
+
+  function crc32(bytes) {
+    var crc = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) {
+      crc = crcTable[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+    }
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  // UTF-8 encoder (lone surrogates become U+FFFD)
+  function utf8(str) {
+    var out = [];
+    for (var i = 0; i < str.length; i++) {
+      var cp = str.charCodeAt(i);
+      if (cp >= 0xD800 && cp <= 0xDBFF && i + 1 < str.length) {
+        var lo = str.charCodeAt(i + 1);
+        if (lo >= 0xDC00 && lo <= 0xDFFF) {
+          cp = 0x10000 + ((cp - 0xD800) << 10) + (lo - 0xDC00);
+          i++;
+        }
+      }
+      if (cp >= 0xD800 && cp <= 0xDFFF) cp = 0xFFFD;
+      if (cp < 0x80) {
+        out.push(cp);
+      } else if (cp < 0x800) {
+        out.push(0xC0 | (cp >> 6), 0x80 | (cp & 63));
+      } else if (cp < 0x10000) {
+        out.push(0xE0 | (cp >> 12), 0x80 | ((cp >> 6) & 63), 0x80 | (cp & 63));
+      } else {
+        out.push(0xF0 | (cp >> 18), 0x80 | ((cp >> 12) & 63), 0x80 | ((cp >> 6) & 63), 0x80 | (cp & 63));
+      }
+    }
+    return new Uint8Array(out);
+  }
+
+  var now = new Date();
+  var dosTime = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)) & 0xFFFF;
+  var dosDate = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate()) & 0xFFFF;
+  var FLAG_UTF8 = 0x0800;
+  var VERSION = 20;
+
+  var entries = [];
+  var size = 0;
+  for (var i = 0; i < files.length; i++) {
+    var name = utf8(files[i].name);
+    var data = files[i].data;
+    var entry = { name: name, data: data, crc: crc32(data), offset: 0 };
+    entries.push(entry);
+    size += 30 + name.length + data.length; // local file header + name + data
+  }
+  for (var j = 0; j < entries.length; j++) {
+    size += 46 + entries[j].name.length; // central directory header + name
+  }
+  size += 22; // end of central directory record
+
+  var out = new Uint8Array(size);
+  var dv = new DataView(out.buffer);
+  var pos = 0;
+
+  // Local file headers + data
+  for (var a = 0; a < entries.length; a++) {
+    var e = entries[a];
+    e.offset = pos;
+    dv.setUint32(pos, 0x04034B50, true);
+    dv.setUint16(pos + 4, VERSION, true);
+    dv.setUint16(pos + 6, FLAG_UTF8, true);
+    dv.setUint16(pos + 8, 0, true); // method: STORE
+    dv.setUint16(pos + 10, dosTime, true);
+    dv.setUint16(pos + 12, dosDate, true);
+    dv.setUint32(pos + 14, e.crc, true);
+    dv.setUint32(pos + 18, e.data.length, true);
+    dv.setUint32(pos + 22, e.data.length, true);
+    dv.setUint16(pos + 26, e.name.length, true);
+    dv.setUint16(pos + 28, 0, true); // extra length
+    pos += 30;
+    out.set(e.name, pos);
+    pos += e.name.length;
+    out.set(e.data, pos);
+    pos += e.data.length;
+  }
+
+  // Central directory
+  var cdOffset = pos;
+  for (var b = 0; b < entries.length; b++) {
+    var f = entries[b];
+    dv.setUint32(pos, 0x02014B50, true);
+    dv.setUint16(pos + 4, 0x031E, true); // made by: Unix, spec 3.0
+    dv.setUint16(pos + 6, VERSION, true);
+    dv.setUint16(pos + 8, FLAG_UTF8, true);
+    dv.setUint16(pos + 10, 0, true); // method: STORE
+    dv.setUint16(pos + 12, dosTime, true);
+    dv.setUint16(pos + 14, dosDate, true);
+    dv.setUint32(pos + 16, f.crc, true);
+    dv.setUint32(pos + 20, f.data.length, true);
+    dv.setUint32(pos + 24, f.data.length, true);
+    dv.setUint16(pos + 28, f.name.length, true);
+    dv.setUint16(pos + 30, 0, true); // extra length
+    dv.setUint16(pos + 32, 0, true); // comment length
+    dv.setUint16(pos + 34, 0, true); // disk number start
+    dv.setUint16(pos + 36, 0, true); // internal attributes
+    dv.setUint32(pos + 38, 0x81A40000, true); // external attributes: regular file, 0644
+    dv.setUint32(pos + 42, f.offset, true);
+    pos += 46;
+    out.set(f.name, pos);
+    pos += f.name.length;
+  }
+  var cdSize = pos - cdOffset;
+
+  // End of central directory
+  dv.setUint32(pos, 0x06054B50, true);
+  dv.setUint16(pos + 4, 0, true); // this disk
+  dv.setUint16(pos + 6, 0, true); // disk with central directory
+  dv.setUint16(pos + 8, entries.length, true);
+  dv.setUint16(pos + 10, entries.length, true);
+  dv.setUint32(pos + 12, cdSize, true);
+  dv.setUint32(pos + 16, cdOffset, true);
+  dv.setUint16(pos + 20, 0, true); // comment length
+
+  return out;
+}
+
+if (typeof module !== "undefined") module.exports = { makeZip };
+
+/*@@ZIP_JS_END@@*/</script>
+<script>
+(function () {
+  var BASE = 'http://localhost:47800';
+
+  var I18N = {
+    hu: {
+      connecting: 'Kapcsolódás…',
+      helperUp: 'Dunk fut',
+      helperDown: 'Dunk nem fut – indítsd el',
+      textLabel: 'Szöveg:',
+      textLive: 'szerkeszthető',
+      textOutline: 'görbe',
+      textBoth: 'mindkettő',
+      saveLabel: 'Mentés:',
+      saveDefault: 'Alapmappa',
+      saveAsk: 'Kérdezzen a végén',
+      saveHintDefault: 'Ide ment: {dir}. Más mappát a Dunk menüjében választhatsz (menüsor, „Kimeneti mappa módosítása…”).',
+      saveHintAsk: 'Ha minden kész, egy ablakban választod ki a mappát.',
+      saveHintUnknown: 'Az alapmappa a Dunkban van beállítva; indítsd el, és itt látod.',
+      emptyList: 'Jelölj ki egy vagy több frame-et (FRAME, COMPONENT, INSTANCE vagy section).',
+      elems: '{n} elem',
+      warnCount: '{n} figyelmeztetés',
+      send: 'Küldés Illustratorba ({n} frame)',
+      zip: 'ZIP letöltés',
+      cancel: 'Mégse (az aktuális frame után)',
+      downNote: 'A Dunk nem érhető el. Letöltheted az exportot ZIP-ben, és később bedolgozhatod.',
+      getDunk: 'Nincs még Dunk? Letöltés',
+      waiting: 'vár',
+      exporting: 'exportál {done}/{total}',
+      exportingPlain: 'exportál…',
+      sending: 'Küldés…',
+      aiWorking: 'Illustrator dolgozik…',
+      doneAi: '✓ kész: {path}',
+      doneAiStaged: '✓ kész (átmeneti hely): {path}',
+      doneZip: '✓ ZIP letöltve: {name}',
+      errPrefix: '✗ hiba',
+      cancelled: 'megszakítva',
+      warningsSuffix: ' ({n} figyelmeztetés)',
+      chooseFolder: 'Válaszd ki a mappát a felugró ablakban…',
+      savedTo: '✓ Mentve ide: {dir}',
+      savedFallback: 'A mentés meg lett szakítva, a fájlok az alapértelmezett mappába kerültek: {dir}',
+      batchFinishFailed: '✗ A mappaválasztás nem sikerült',
+      fatal: 'Váratlan hiba',
+      ERR_LAYER_NOT_FOUND: 'A réteg nem található a klónban: {name}',
+      ERR_NO_BOUNDS: 'Nincs renderelhető terület: {name}',
+      ERR_FRAME_GONE: 'A frame már nem létezik vagy nem támogatott.',
+      ERR_EXPORT: 'Exportálás sikertelen',
+      ERR_TIMEOUT: 'időtúllépés (11 perc)',
+      ERR_UNREACHABLE: 'a Dunk nem érhető el',
+      ERR_ZIP_MISSING: 'a ZIP modul nincs beépítve',
+      ERR_ZIP_FAILED: 'ZIP készítés sikertelen',
+      ERR_HTTP: 'HTTP {status}',
+      ILLUSTRATOR_NOT_FOUND: 'Az Illustrator nem található',
+      BAD_REQUEST: 'Hibás kérés',
+      JSX_FAILED: 'Az Illustrator-szkript hibával leállt',
+      TIMEOUT: 'A feldolgozás időtúllépéssel leállt',
+      FORBIDDEN_ORIGIN: 'A kérés eredete nem engedélyezett',
+      INTERNAL: 'Belső hiba a Dunkban',
+      UNKNOWN_ERROR: 'Ismeretlen hiba',
+      DROP_SHADOW: 'Árnyék: "{name}" – az Illustratorban nem biztos, hogy szerkeszthető marad',
+      MIXED_TEXT: 'Vegyes stílusú szöveg: "{name}"',
+      MASK_NESTED: 'Figma maszk az elemen belül: "{name}" (az elemen belül megmarad)',
+      MASK_TOP: 'Figma maszk a frame szintjén: "{name}" – a maszkolt rétegek külön elemként elveszíthetik a maszkot',
+      BLUR_RASTERIZED: 'Blur miatt raszterként megy: "{name}"',
+      PLUS_EXPLODED: '"{name}" szétbontva (+ csoport)',
+      HIDDEN_SKIPPED: '{count} rejtett réteg kihagyva',
+      DUPLICATE_NAME: 'Duplikált név, átnevezve: "{name}"',
+      AUTO_NAME_REPLACED: 'Figma automatikus név átnevezve: "{from}" → "{to}"',
+      PLAN_FAILED: 'Elemzés nem sikerült: {detail}'
+    },
+    en: {
+      connecting: 'Connecting…',
+      helperUp: 'Dunk is running',
+      helperDown: 'Dunk is not running – start it',
+      textLabel: 'Text:',
+      textLive: 'editable',
+      textOutline: 'outlined',
+      textBoth: 'both',
+      saveLabel: 'Save to:',
+      saveDefault: 'Default folder',
+      saveAsk: 'Ask when done',
+      saveHintDefault: 'Saves to: {dir}. Change it in the Dunk menu (menu bar, “Change output folder…”).',
+      saveHintAsk: 'When everything is done, you pick the folder in a dialog.',
+      saveHintUnknown: 'The default folder is set in Dunk; start it to see it here.',
+      emptyList: 'Select one or more frames (FRAME, COMPONENT, INSTANCE or a section).',
+      elems: '{n} elements',
+      warnCount: '{n} warnings',
+      send: 'Send to Illustrator ({n} frames)',
+      zip: 'Download ZIP',
+      cancel: 'Cancel (after the current frame)',
+      downNote: 'Dunk is not reachable. You can download the export as a ZIP and import it later.',
+      getDunk: 'No Dunk yet? Download it',
+      waiting: 'waiting',
+      exporting: 'exporting {done}/{total}',
+      exportingPlain: 'exporting…',
+      sending: 'Sending…',
+      aiWorking: 'Illustrator is working…',
+      doneAi: '✓ done: {path}',
+      doneAiStaged: '✓ done (temporary location): {path}',
+      doneZip: '✓ ZIP downloaded: {name}',
+      errPrefix: '✗ error',
+      cancelled: 'cancelled',
+      warningsSuffix: ' ({n} warnings)',
+      chooseFolder: 'Choose a folder in the dialog…',
+      savedTo: '✓ Saved to: {dir}',
+      savedFallback: 'Saving was cancelled, the files were put in the default folder: {dir}',
+      batchFinishFailed: '✗ Folder selection failed',
+      fatal: 'Unexpected error',
+      ERR_LAYER_NOT_FOUND: 'Layer not found in the clone: {name}',
+      ERR_NO_BOUNDS: 'Nothing to render: {name}',
+      ERR_FRAME_GONE: 'The frame no longer exists or is not supported.',
+      ERR_EXPORT: 'Export failed',
+      ERR_TIMEOUT: 'timed out (11 minutes)',
+      ERR_UNREACHABLE: 'Dunk is not reachable',
+      ERR_ZIP_MISSING: 'the ZIP module is not included',
+      ERR_ZIP_FAILED: 'ZIP creation failed',
+      ERR_HTTP: 'HTTP {status}',
+      ILLUSTRATOR_NOT_FOUND: 'Illustrator was not found',
+      BAD_REQUEST: 'Bad request',
+      JSX_FAILED: 'The Illustrator script failed',
+      TIMEOUT: 'Processing timed out',
+      FORBIDDEN_ORIGIN: 'Request origin not allowed',
+      INTERNAL: 'Internal error in Dunk',
+      UNKNOWN_ERROR: 'Unknown error',
+      DROP_SHADOW: 'Drop shadow: "{name}" – may not stay editable in Illustrator',
+      MIXED_TEXT: 'Mixed-style text: "{name}"',
+      MASK_NESTED: 'Figma mask inside the element: "{name}" (kept within the element)',
+      MASK_TOP: 'Figma mask at frame level: "{name}" – masked layers may lose the mask as separate elements',
+      BLUR_RASTERIZED: 'Sent as raster because of blur: "{name}"',
+      PLUS_EXPLODED: '"{name}" exploded (+ group)',
+      HIDDEN_SKIPPED: '{count} hidden layers skipped',
+      DUPLICATE_NAME: 'Duplicate name, renamed: "{name}"',
+      AUTO_NAME_REPLACED: 'Figma auto-name renamed: "{from}" → "{to}"',
+      PLAN_FAILED: 'Analysis failed: {detail}'
+    }
+  };
+
+  var lang = 'hu';
+  var frames = [];          // current selection
+  var pendingSelection = null;
+  var statuses = {};        // frameId -> {cls, fn}
+  var batchInfo = null;     // {cls, fn}
+  var textMode = 'live';
+  var saveMode = 'default';
+  var helperState = null;   // null = unknown, true, false
+  var outputDir = null;
+  var lastPingKey = null;
+  var openFrames = {};      // frameId -> warnings <details> open state
+  var running = false;
+  var runMode = 'send';     // 'send' | 'zip'
+  var batch = null;         // {id, saveMode, successes}
+  var queueChain = Promise.resolve();
+
+  var $ = function (id) { return document.getElementById(id); };
+  var dot = $('dot'), statusText = $('statusText'), list = $('list'), batchMsg = $('batchMsg');
+  var sendBtn = $('sendBtn'), zipBtn = $('zipBtn'), cancelBtn = $('cancelBtn'), downNote = $('downNote');
+  var modeLive = $('modeLive'), modeOutline = $('modeOutline'), modeBoth = $('modeBoth');
+  var saveDefault = $('saveDefault'), saveAsk = $('saveAsk');
+  var langHu = $('langHu'), langEn = $('langEn');
+
+  function t(key, params) {
+    var s = I18N[lang][key];
+    if (s === undefined) s = I18N.hu[key];
+    if (s === undefined) s = key;
+    if (params) {
+      s = s.replace(/\{(\w+)\}/g, function (m, k) { return params[k] === undefined ? m : params[k]; });
+    }
+    return s;
+  }
+
+  function post(msg) { parent.postMessage({ pluginMessage: msg }, '*'); }
+
+  function mk(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  // short = quoted names/excerpts cut to 60 chars (the full text goes into a tooltip)
+  function warnText(w, short) {
+    var params = w.params;
+    if (short && params) {
+      params = {};
+      Object.keys(w.params).forEach(function (k) {
+        var v = w.params[k];
+        params[k] = typeof v === 'string' && v.length > 60 ? v.slice(0, 60) + '\u2026' : v;
+      });
+    }
+    return t(w.code, params);
+  }
+
+  function errText(code, params, detail) {
+    var s = t('errPrefix') + ': ' + t(code, params);
+    if (detail) s += ' – ' + detail;
+    return s;
+  }
+
+  // ------------------------------------------------------------ rendering
+  function render() {
+    document.documentElement.lang = lang;
+    var nodes = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < nodes.length; i++) nodes[i].textContent = t(nodes[i].getAttribute('data-i18n'));
+    modeLive.textContent = t('textLive');
+    modeOutline.textContent = t('textOutline');
+    modeBoth.textContent = t('textBoth');
+    saveDefault.textContent = t('saveDefault');
+    saveAsk.textContent = t('saveAsk');
+    var shortDir = outputDir ? outputDir.replace(/^\/Users\/[^\/]+/, '~').replace(/^[A-Za-z]:[\\\/]+Users[\\\/]+[^\\\/]+/, '~') : null;
+    $('saveHint').textContent = saveMode === 'ask' ? t('saveHintAsk') : (helperState && shortDir ? t('saveHintDefault', { dir: shortDir }) : t('saveHintUnknown'));
+    zipBtn.textContent = t('zip');
+    cancelBtn.textContent = t('cancel');
+    statusText.textContent = helperState === null ? t('connecting') : (helperState ? t('helperUp') : t('helperDown'));
+    dot.className = 'dot' + (helperState === null ? '' : (helperState ? ' ok' : ' bad'));
+
+    var prevScroll = list.scrollTop;
+    list.textContent = '';
+    if (!frames.length) list.appendChild(mk('div', 'empty', t('emptyList')));
+    frames.forEach(function (f) {
+      var box = mk('div', 'frame');
+      box.appendChild(mk('div', 'fname', f.name));
+      box.appendChild(mk('div', 'meta', f.width + ' × ' + f.height + ' · ' + t('elems', { n: f.elementCount })));
+      var st = statuses[f.id];
+      if (st) box.appendChild(mk('div', 'st ' + (st.cls || ''), st.fn()));
+      if (f.warnings && f.warnings.length) {
+        var d = document.createElement('details');
+        d.open = !!openFrames[f.id];
+        d.addEventListener('toggle', function () { openFrames[f.id] = d.open; });
+        d.appendChild(mk('summary', '', t('warnCount', { n: f.warnings.length })));
+        var ul = document.createElement('ul');
+        f.warnings.forEach(function (w) { var li = mk('li', w.level === 'warn' ? 'warn' : 'info', warnText(w, true));
+          li.title = warnText(w, false);
+          ul.appendChild(li); });
+        d.appendChild(ul);
+        box.appendChild(d);
+      }
+      list.appendChild(box);
+    });
+    list.scrollTop = prevScroll;
+
+    if (batchInfo) {
+      batchMsg.className = 'batch ' + (batchInfo.cls || '');
+      batchMsg.textContent = batchInfo.fn();
+    } else {
+      batchMsg.className = 'batch hidden';
+    }
+
+    var n = frames.length;
+    var up = helperState === true;
+    sendBtn.textContent = t('send', { n: n });
+    sendBtn.disabled = running || !n || !up;
+    sendBtn.classList.toggle('hidden', !up && !running);
+    zipBtn.classList.toggle('hidden', up || running);
+    zipBtn.disabled = !n;
+    downNote.classList.toggle('hidden', up || running);
+    $('getDunkBtn').classList.toggle('hidden', up || running);
+    cancelBtn.classList.toggle('hidden', !running || runMode === 'wait');
+    modeLive.disabled = modeOutline.disabled = modeBoth.disabled = running;
+    saveDefault.disabled = saveAsk.disabled = running;
+    modeLive.classList.toggle('on', textMode === 'live');
+    modeOutline.classList.toggle('on', textMode === 'outline');
+    modeBoth.classList.toggle('on', textMode === 'both');
+    saveDefault.classList.toggle('on', saveMode === 'default');
+    saveAsk.classList.toggle('on', saveMode === 'ask');
+    langHu.classList.toggle('on', lang === 'hu');
+    langEn.classList.toggle('on', lang === 'en');
+  }
+
+  function setStatus(id, cls, fn) {
+    statuses[id] = { cls: cls, fn: fn };
+    render();
+  }
+
+  // ------------------------------------------------------------ helper ping
+  function ping() {
+    var ac = new AbortController();
+    var timer = setTimeout(function () { ac.abort(); }, 2500);
+    fetch(BASE + '/ping', { signal: ac.signal })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { helperState = !!(j && j.ok); outputDir = (j && j.outputDir) || null; })
+      .catch(function () { helperState = false; })
+      .then(function () {
+        clearTimeout(timer);
+        var key = String(helperState) + '|' + outputDir;
+        if (key !== lastPingKey) { lastPingKey = key; render(); }
+      });
+  }
+  ping();
+  setInterval(ping, 3000);
+
+  // ------------------------------------------------------------ base64 (chunked)
+  function toBase64(bytes) {
+    var CH = 3 * 8192; // multiple of 3 -> no padding between chunks
+    var out = [];
+    for (var i = 0; i < bytes.length; i += CH) {
+      var sub = bytes.subarray(i, Math.min(i + CH, bytes.length));
+      var s = '';
+      for (var j = 0; j < sub.length; j += 8192) {
+        s += String.fromCharCode.apply(null, sub.subarray(j, Math.min(j + 8192, sub.length)));
+      }
+      out.push(btoa(s));
+    }
+    return out.join('');
+  }
+
+  function safeName(s) {
+    return String(s).replace(/[\/\\:*?"<>|\u0000-\u001f]/g, '_').trim() || 'frame';
+  }
+
+  // pre-flight codes + params -> readable message for the manifest
+  function fillPreflightMessages(manifest) {
+    (manifest.preflight || []).forEach(function (p) {
+      p.message = warnText(p);
+    });
+  }
+
+  // ------------------------------------------------------------ per-frame handling
+  async function sendFrame(msg) {
+    var id = msg.frameId;
+    setStatus(id, '', function () { return t('sending'); });
+    fillPreflightMessages(msg.manifest);
+    var files = {};
+    for (var i = 0; i < msg.files.length; i++) {
+      files[msg.files[i].name] = toBase64(msg.files[i].data);
+      msg.files[i].data = null;
+    }
+    var body = JSON.stringify({ manifest: msg.manifest, files: files });
+    files = null;
+    var ac = new AbortController();
+    var timer = setTimeout(function () { ac.abort(); }, 11 * 60 * 1000);
+    try {
+      setStatus(id, '', function () { return t('aiWorking'); });
+      var res = await fetch(BASE + '/frame', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: body,
+        signal: ac.signal
+      });
+      var j = null;
+      try { j = await res.json(); } catch (e) { j = null; }
+      if (j && j.ok) {
+        if (batch) batch.successes++;
+        var extra = j.report && j.report.warnings && j.report.warnings.length ? j.report.warnings.length : 0;
+        setStatus(id, 'done', function () {
+          return t(j.staged ? 'doneAiStaged' : 'doneAi', { path: j.aiPath }) + (extra ? t('warningsSuffix', { n: extra }) : '');
+        });
+      } else if (j && j.error) {
+        var known = I18N.hu[j.error.code] !== undefined;
+        setStatus(id, 'err', function () {
+          return errText(known ? j.error.code : 'UNKNOWN_ERROR', {}, j.error.message);
+        });
+      } else {
+        setStatus(id, 'err', function () { return errText('ERR_HTTP', { status: res.status }); });
+      }
+    } catch (e) {
+      var aborted = e && e.name === 'AbortError';
+      var d = e && e.message ? e.message : String(e);
+      setStatus(id, 'err', function () { return errText(aborted ? 'ERR_TIMEOUT' : 'ERR_UNREACHABLE', {}, aborted ? '' : d); });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function downloadZip(msg) {
+    var id = msg.frameId;
+    if (typeof makeZip !== 'function') {
+      setStatus(id, 'err', function () { return errText('ERR_ZIP_MISSING'); });
+      return;
+    }
+    fillPreflightMessages(msg.manifest);
+    var dir = safeName(msg.manifest.frame.name);
+    var entries = [{ name: dir + '/manifest.json', data: new TextEncoder().encode(JSON.stringify(msg.manifest, null, 2)) }];
+    msg.files.forEach(function (f) { entries.push({ name: dir + '/' + f.name, data: f.data }); });
+    try {
+      var zip = makeZip(entries);
+      var blob = new Blob([zip], { type: 'application/zip' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = dir + '.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+      setStatus(id, 'done', function () { return t('doneZip', { name: dir + '.zip' }); });
+    } catch (e) {
+      var d = e && e.message ? e.message : String(e);
+      setStatus(id, 'err', function () { return errText('ERR_ZIP_FAILED', {}, d); });
+    }
+  }
+
+  async function finishBatch() {
+    batchInfo = { cls: '', fn: function () { return t('chooseFolder'); } };
+    render();
+    var ac = new AbortController();
+    var timer = setTimeout(function () { ac.abort(); }, 30 * 60 * 1000);
+    try {
+      var res = await fetch(BASE + '/batch-finish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batchId: batch.id, lang: lang }),
+        signal: ac.signal
+      });
+      var j = null;
+      try { j = await res.json(); } catch (e) { j = null; }
+      if (j && j.ok) {
+        batchInfo = {
+          cls: 'done',
+          fn: function () { return j.cancelled ? t('savedFallback', { dir: j.dir }) : t('savedTo', { dir: j.dir }); }
+        };
+      } else {
+        var known = j && j.error && I18N.hu[j.error.code] !== undefined;
+        var code = known ? j.error.code : 'UNKNOWN_ERROR';
+        var detail = j && j.error ? j.error.message : '';
+        batchInfo = { cls: 'err', fn: function () { return t('batchFinishFailed') + ': ' + t(code) + (detail ? ' – ' + detail : ''); } };
+      }
+    } catch (e) {
+      var aborted = e && e.name === 'AbortError';
+      var d = e && e.message ? e.message : String(e);
+      batchInfo = { cls: 'err', fn: function () { return t('batchFinishFailed') + ': ' + t(aborted ? 'ERR_TIMEOUT' : 'ERR_UNREACHABLE') + (aborted ? '' : ' – ' + d); } };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // ------------------------------------------------------------ messages from code.js
+  window.onmessage = function (ev) {
+    var msg = ev.data && ev.data.pluginMessage;
+    if (!msg) return;
+    switch (msg.type) {
+      case 'init':
+        textMode = msg.textMode;
+        saveMode = msg.saveMode || 'default';
+        if (msg.lang === 'hu' || msg.lang === 'en') {
+          lang = msg.lang;
+        } else {
+          lang = String(navigator.language || '').toLowerCase().indexOf('en') === 0 ? 'en' : 'hu';
+          post({ type: 'set-lang', lang: lang, persist: false });
+        }
+        render();
+        break;
+      case 'selection':
+        if (running) { pendingSelection = msg.frames; break; }
+        frames = msg.frames;
+        statuses = {};
+        batchInfo = null;
+        render();
+        break;
+      case 'frame-status':
+        if (msg.total) setStatus(msg.frameId, '', function () { return t('exporting', { done: msg.done, total: msg.total }); });
+        else setStatus(msg.frameId, '', function () { return t('exportingPlain'); });
+        break;
+      case 'frame-data':
+        // process sequentially; the ack lets the plugin continue with the next frame
+        queueChain = queueChain.then(async function () {
+          if (runMode === 'zip') downloadZip(msg); else await sendFrame(msg);
+          post({ type: 'frame-ack', frameId: msg.frameId });
+        });
+        break;
+      case 'frame-error':
+        setStatus(msg.frameId, 'err', function () { return errText(msg.code, msg.params, msg.detail); });
+        break;
+      case 'frame-cancelled':
+        setStatus(msg.frameId, '', function () { return t('cancelled'); });
+        break;
+      case 'fatal':
+        batchInfo = { cls: 'err', fn: function () { return t('fatal') + ': ' + msg.detail; } };
+        render();
+        break;
+      case 'batch-done':
+        queueChain = queueChain.then(async function () {
+          if (runMode === 'send' && batch && batch.saveMode === 'ask' && batch.successes > 0) {
+            runMode = 'wait';
+            await finishBatch();
+          }
+          running = false;
+          runMode = 'send';
+          if (pendingSelection) {
+            // keep results visible until the selection really changes
+            var same = pendingSelection.length === frames.length && pendingSelection.every(function (f, i) { return f.id === frames[i].id; });
+            if (!same) { frames = pendingSelection; statuses = {}; batchInfo = null; }
+            pendingSelection = null;
+          }
+          render();
+        });
+        break;
+    }
+  };
+
+  // ------------------------------------------------------------ controls
+  function start(mode) {
+    if (running || !frames.length) return;
+    running = true;
+    runMode = mode;
+    statuses = {};
+    batchInfo = null;
+    var id = 'b-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+    var sm = mode === 'send' ? saveMode : 'default'; // ZIP ignores the save mode
+    batch = { id: id, saveMode: sm, successes: 0 };
+    frames.forEach(function (f) { statuses[f.id] = { cls: '', fn: function () { return t('waiting'); } }; });
+    render();
+    post({ type: 'export', frameIds: frames.map(function (f) { return f.id; }), batchId: id, saveMode: sm, lang: lang });
+  }
+  sendBtn.onclick = function () { start('send'); };
+  zipBtn.onclick = function () { start('zip'); };
+  $('getDunkBtn').onclick = function () { post({ type: 'open-download' }); };
+  cancelBtn.onclick = function () {
+    cancelBtn.disabled = true;
+    post({ type: 'cancel' });
+  };
+  modeLive.onclick = function () { if (!running) { textMode = 'live'; post({ type: 'set-text-mode', mode: 'live' }); render(); } };
+  modeBoth.onclick = function () { if (!running) { textMode = 'both'; post({ type: 'set-text-mode', mode: 'both' }); render(); } };
+  modeOutline.onclick = function () { if (!running) { textMode = 'outline'; post({ type: 'set-text-mode', mode: 'outline' }); render(); } };
+  saveDefault.onclick = function () { if (!running) { saveMode = 'default'; post({ type: 'set-save-mode', mode: 'default' }); render(); } };
+  saveAsk.onclick = function () { if (!running) { saveMode = 'ask'; post({ type: 'set-save-mode', mode: 'ask' }); render(); } };
+  function setLang(l) { lang = l; post({ type: 'set-lang', lang: l }); render(); }
+  langHu.onclick = function () { setLang('hu'); };
+  langEn.onclick = function () { setLang('en'); };
+
+  render();
+  post({ type: 'ready' });
+})();
+</script>
+</body>
+</html>

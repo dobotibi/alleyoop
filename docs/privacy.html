@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alleyoop Privacy</title>
+<link rel="icon" href="img/alleyoop-plugin-icon-256.png">
+<style>
+  :root { --bg: #F7F5F2; --ink: #1E1E1E; --muted: #5E5A55; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #161514; --ink: #F2EFEA; --muted: #A9A39B; } }
+  :root[data-theme="dark"] { --bg: #161514; --ink: #F2EFEA; --muted: #A9A39B; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 system-ui, sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 48px 16px; }
+  h1 { font-size: 34px; margin: 0 0 8px; } p.d { color: var(--muted); margin-top: 0; }
+  h2 { font-size: 20px; margin-top: 32px; } a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Privacy</h1>
+  <p class="d">Alleyoop (Figma plugin) and Dunk (helper app). Last updated: 23 November 2026.</p>
+
+  <h2>Short version</h2>
+  <p>Nothing leaves your computer. No account, no analytics, no tracking, no server.</p>
+
+  <h2>What the plugin reads</h2>
+  <p>Only the frames you select and click to send. It exports them as PDF, SVG and PNG files, together with a small description (layer names, sizes, positions).</p>
+
+  <h2>Where it goes</h2>
+  <p>The plugin sends these files to Dunk at <code>http://localhost:47800</code>. This address is your own computer. Dunk accepts requests only from your machine and only from Figma.</p>
+  <p>Dunk writes the files to a temporary folder, lets Adobe Illustrator build the .ai file, and saves it to the folder you chose. Temporary files are deleted after a successful job. After a failed job the last few are kept on your computer, so you can send them with a bug report if you want.</p>
+
+  <h2>What is stored</h2>
+  <p>The plugin remembers your settings (language, text mode, save mode) in Figma's local plugin storage. Dunk keeps its settings and a log file in its application folder on your computer. Nothing is sent anywhere.</p>
+
+  <h2>Contact</h2>
+  <p>Questions: open an issue at <a href="https://github.com/dobotibi/alleyoop/issues">github.com/dobotibi/alleyoop</a>. The code is open, you can check all of this there.</p>
+  <p><a href="./">← Back to Alleyoop</a></p>
+</main>
+</body>
+</html>

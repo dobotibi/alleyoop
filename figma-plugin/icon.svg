@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 30.4.0, SVG Export Plug-In . SVG Version: 9.03 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 1024 1024" style="enable-background:new 0 0 1024 1024;" xml:space="preserve">
+<g id="Layer_2">
+	<path id="background" style="fill:#F7F5F2;" d="M285,100h454c102.173,0,185,82.827,185,185v454c0,102.173-82.827,185-185,185H285
+		c-102.173,0-185-82.827-185-185V285C100,182.827,182.827,100,285,100z"/>
+</g>
+<g id="Layer_1">
+	
+		<circle id="ball-outline" style="fill:none;stroke:#F7F5F2;stroke-width:28.1721;stroke-linecap:round;stroke-linejoin:round;" cx="512" cy="512" r="279.522"/>
+	<g>
+		<defs>
+			<circle id="ball-outline_00000027562750086714471160000006708196141016307355_" cx="512" cy="512" r="279.522"/>
+		</defs>
+		<clipPath id="ball-outline_00000088844765640509720010000008303459050291433137_">
+			<use xlink:href="#ball-outline_00000027562750086714471160000006708196141016307355_"  style="overflow:visible;"/>
+		</clipPath>
+		<g style="clip-path:url(#ball-outline_00000088844765640509720010000008303459050291433137_);">
+			
+				<path id="seam-vertical" style="fill:none;stroke:#1E1E1E;stroke-width:28.1721;stroke-linecap:round;stroke-linejoin:round;" d="
+				M512,220.889v582.222"/>
+			
+				<path id="seam-horizontal" style="fill:none;stroke:#1E1E1E;stroke-width:28.1721;stroke-linecap:round;stroke-linejoin:round;" d="
+				M220.889,512h582.222"/>
+			<g id="seam-left-AE-anchor_00000111157787765105462240000009222882020971979693_">
+				<path style="fill:#F7F5F2;" d="M603.387,481.124h50.174c3.197,0,5.789,2.592,5.789,5.789v50.174
+					c0,3.197-2.592,5.789-5.789,5.789h-50.174c-3.197,0-5.789-2.592-5.789-5.789v-50.174
+					C597.598,483.716,600.19,481.124,603.387,481.124z"/>
+				<path style="fill:none;stroke:#F7F5F2;stroke-width:46.9534;stroke-linecap:round;stroke-linejoin:round;" d="M603.387,481.124
+					h50.174c3.197,0,5.789,2.592,5.789,5.789v50.174c0,3.197-2.592,5.789-5.789,5.789h-50.174c-3.197,0-5.789-2.592-5.789-5.789
+					v-50.174C597.598,483.716,600.19,481.124,603.387,481.124z"/>
+				<path style="fill:none;stroke:#FF9A00;stroke-width:18.7814;stroke-linecap:round;stroke-linejoin:round;" d="M603.387,481.124
+					h50.174c3.197,0,5.789,2.592,5.789,5.789v50.174c0,3.197-2.592,5.789-5.789,5.789h-50.174c-3.197,0-5.789-2.592-5.789-5.789
+					v-50.174C597.598,483.716,600.19,481.124,603.387,481.124z"/>
+			</g>
+			<g id="seam-left-AE-anchor_00000085959905738170951340000014756426654890189479_">
+				<path style="fill:#F7F5F2;" d="M370.469,481.124h50.174c3.197,0,5.789,2.592,5.789,5.789v50.174
+					c0,3.197-2.592,5.789-5.789,5.789h-50.174c-3.197,0-5.789-2.592-5.789-5.789v-50.174
+					C364.679,483.716,367.271,481.124,370.469,481.124z"/>
+				<path style="fill:none;stroke:#F7F5F2;stroke-width:46.9534;stroke-linecap:round;stroke-linejoin:round;" d="M370.469,481.124
+					h50.174c3.197,0,5.789,2.592,5.789,5.789v50.174c0,3.197-2.592,5.789-5.789,5.789h-50.174c-3.197,0-5.789-2.592-5.789-5.789
+					v-50.174C364.679,483.716,367.271,481.124,370.469,481.124z"/>
+				<path style="fill:none;stroke:#9999FF;stroke-width:18.7814;stroke-linecap:round;stroke-linejoin:round;" d="M370.469,481.124
+					h50.174c3.197,0,5.789,2.592,5.789,5.789v50.174c0,3.197-2.592,5.789-5.789,5.789h-50.174c-3.197,0-5.789-2.592-5.789-5.789
+					v-50.174C364.679,483.716,367.271,481.124,370.469,481.124z"/>
+			</g>
+			
+				<path id="seam-left-AE-arc" style="fill:none;stroke:#9999FF;stroke-width:18.7814;stroke-linecap:round;stroke-linejoin:round;" d="
+				M270.241,315.878c167.086,107.847,167.086,284.396,0,392.243"/>
+			
+				<path id="seam-left-AE-handle" style="fill:none;stroke:#9999FF;stroke-width:18.7814;stroke-linecap:round;stroke-linejoin:round;" d="
+				M395.556,350.33V673.67"/>
+			
+				<circle id="seam-left-AE-handle-top" style="fill:#F7F5F2;stroke:#9999FF;stroke-width:18.7814;stroke-linecap:round;stroke-linejoin:round;" cx="395.556" cy="330.87" r="29.449"/>
+			
+				<circle id="seam-left-AE-handle-bottom" style="fill:#F7F5F2;stroke:#9999FF;stroke-width:18.7814;stroke-linecap:round;stroke-linejoin:round;" cx="395.556" cy="688.435" r="29.449"/>
+			
+				<path id="seam-right-AI-arc" style="fill:none;stroke:#FF9A00;stroke-width:18.7814;stroke-linecap:round;stroke-linejoin:round;" d="
+				M753.788,315.878c-167.086,107.847-167.086,284.396,0,392.243"/>
+			
+				<path id="seam-right-AI-handle" style="fill:none;stroke:#FF9A00;stroke-width:18.7814;stroke-linecap:round;stroke-linejoin:round;" d="
+				M628.445,350.33V673.67"/>
+			
+				<circle id="seam-right-AI-handle-top" style="fill:#F7F5F2;stroke:#FF9A00;stroke-width:18.7814;stroke-linecap:round;stroke-linejoin:round;" cx="628.445" cy="330.87" r="29.449"/>
+			
+				<circle id="seam-right-AI-handle-bottom" style="fill:#F7F5F2;stroke:#FF9A00;stroke-width:18.7814;stroke-linecap:round;stroke-linejoin:round;" cx="628.445" cy="688.435" r="29.449"/>
+		</g>
+	</g>
+</g>
+<g id="Layer_4">
+	<g id="seam-left-AE-anchor_00000155852823567157149710000003780259835744144768_">
+		<path style="fill:#F7F5F2;" d="M603.387,481.124h50.174c3.197,0,5.789,2.592,5.789,5.789v50.174c0,3.197-2.592,5.789-5.789,5.789
+			h-50.174c-3.197,0-5.789-2.592-5.789-5.789v-50.174C597.598,483.716,600.19,481.124,603.387,481.124z"/>
+		<path style="fill:none;stroke:#FF9A00;stroke-width:18.7814;stroke-linecap:round;stroke-linejoin:round;" d="M603.387,481.124
+			h50.174c3.197,0,5.789,2.592,5.789,5.789v50.174c0,3.197-2.592,5.789-5.789,5.789h-50.174c-3.197,0-5.789-2.592-5.789-5.789
+			v-50.174C597.598,483.716,600.19,481.124,603.387,481.124z"/>
+	</g>
+	<g id="seam-left-AE-anchor">
+		<path style="fill:#F7F5F2;" d="M370.469,481.124h50.174c3.197,0,5.789,2.592,5.789,5.789v50.174c0,3.197-2.592,5.789-5.789,5.789
+			h-50.174c-3.197,0-5.789-2.592-5.789-5.789v-50.174C364.679,483.716,367.271,481.124,370.469,481.124z"/>
+		<path style="fill:none;stroke:#9999FF;stroke-width:18.7814;stroke-linecap:round;stroke-linejoin:round;" d="M370.469,481.124
+			h50.174c3.197,0,5.789,2.592,5.789,5.789v50.174c0,3.197-2.592,5.789-5.789,5.789h-50.174c-3.197,0-5.789-2.592-5.789-5.789
+			v-50.174C364.679,483.716,367.271,481.124,370.469,481.124z"/>
+	</g>
+</g>
+<g id="Layer_3">
+	
+		<circle id="ball-outline_00000005234661294712923850000008012922822584841611_" style="fill:none;stroke:#F7F5F2;stroke-width:28.1721;stroke-linecap:round;stroke-linejoin:round;" cx="512" cy="512" r="279.522"/>
+	<g id="ball-outline_00000057144672214227672000000009551828850390015631_">
+		<path style="fill:#1E1E1E;" d="M512,232.478c154.376,0,279.522,125.146,279.522,279.522S666.376,791.522,512,791.522
+			S232.478,666.376,232.478,512S357.624,232.478,512,232.478 M512,204.306c-41.526,0-81.825,8.139-119.777,24.192
+			c-36.643,15.499-69.547,37.681-97.795,65.93c-28.249,28.249-50.431,61.152-65.93,97.795
+			c-16.052,37.952-24.192,78.251-24.192,119.777s8.139,81.825,24.192,119.777c15.499,36.643,37.681,69.547,65.93,97.795
+			c28.249,28.249,61.152,50.431,97.795,65.93c37.952,16.052,78.251,24.192,119.777,24.192s81.825-8.139,119.777-24.192
+			c36.643-15.499,69.547-37.681,97.795-65.93c28.249-28.249,50.431-61.152,65.93-97.795c16.052-37.952,24.192-78.251,24.192-119.777
+			s-8.139-81.825-24.192-119.777c-15.499-36.643-37.681-69.547-65.93-97.795c-28.249-28.249-61.152-50.431-97.795-65.93
+			C593.825,212.445,553.526,204.306,512,204.306L512,204.306z"/>
+	</g>
+	
+		<path id="seam-vertical_00000011030800325059697210000018317762388986675624_" style="fill:none;stroke:#1E1E1E;stroke-width:28.1721;stroke-linecap:round;stroke-linejoin:round;" d="
+		M512,220.889v582.222"/>
+	
+		<path id="seam-horizontal_00000004516085084562168080000004237074472795867321_" style="fill:none;stroke:#1E1E1E;stroke-width:28.1721;stroke-linecap:round;stroke-linejoin:round;" d="
+		M222.438,512h85.615"/>
+	
+		<path id="seam-horizontal_00000152223993562119320940000004903531617828292743_" style="fill:none;stroke:#1E1E1E;stroke-width:28.1721;stroke-linecap:round;stroke-linejoin:round;" d="
+		M715.947,512h85.615"/>
+</g>
+</svg>

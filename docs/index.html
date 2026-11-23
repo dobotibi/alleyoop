@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alleyoop + Dunk</title>
+<meta name="description" content="A Figma plugin and a small Mac app. Figma frames become clean, layered Illustrator files, ready for After Effects.">
+<link rel="icon" href="img/alleyoop-plugin-icon-256.png">
+<meta property="og:title" content="Alleyoop + Dunk">
+<meta property="og:description" content="Figma frames to clean, layered Illustrator files, for After Effects.">
+<meta property="og:image" content="https://dobotibi.github.io/alleyoop/img/cover.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5F2; --surface: #FFFFFF; --ink: #1E1E1E; --muted: #5E5A55; --line: #E3DED7;
+    --ae: #9999FF; --ai: #FF9A00; --ae-ink: #4B4BC7; --ai-ink: #A85E00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161514; --surface: #201F1D; --ink: #F2EFEA; --muted: #A9A39B; --line: #34312D;
+      --ae-ink: #B8B8FF; --ai-ink: #FFB84D;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161514; --surface: #201F1D; --ink: #F2EFEA; --muted: #A9A39B; --line: #34312D;
+    --ae-ink: #B8B8FF; --ai-ink: #FFB84D;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 "Instrument Sans", system-ui, sans-serif; }
+  a { color: inherit; text-underline-offset: 3px; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+  @media (min-width: 720px) { .wrap { padding: 0 32px; } }
+
+  header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; text-decoration: none; }
+  .brand img { width: 32px; height: 32px; border-radius: 8px; }
+  header nav a { color: var(--muted); text-decoration: none; margin-left: 18px; font-size: 15px; }
+  header nav a:hover { color: var(--ink); }
+
+  .hero { padding: 56px 0 40px; display: grid; gap: 40px; }
+  @media (min-width: 860px) { .hero { grid-template-columns: 1.15fr 1fr; align-items: center; padding: 88px 0 64px; } }
+  h1 { font-size: clamp(40px, 7vw, 68px); line-height: 1.02; letter-spacing: -0.03em; margin: 0 0 20px; font-weight: 700; }
+  h1 .ae { color: var(--ae-ink); } h1 .ai { color: var(--ai-ink); }
+  .lead { font-size: 20px; color: var(--muted); margin: 0 0 28px; max-width: 34ch; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 20px; border-radius: 12px; font-weight: 600; text-decoration: none; font-size: 16px; border: 1.5px solid var(--ink); }
+  .btn.primary { background: var(--ink); color: var(--bg); }
+  .btn:hover { transform: translateY(-1px); }
+  .small { font-size: 14px; color: var(--muted); margin-top: 14px; }
+
+  /* the pass: Figma -> Dunk -> Illustrator */
+  .pass { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 28px 20px 20px; }
+  .pass svg { width: 100%; height: auto; display: block; }
+  .pass .cap { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  section { padding: 56px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(28px, 4vw, 38px); letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 20px; }
+  .story p { max-width: 62ch; margin: 0 0 16px; font-size: 19px; }
+  .story p:first-of-type::first-letter { font-weight: 700; }
+
+  .grid { display: grid; gap: 16px; }
+  @media (min-width: 720px) { .grid.three { grid-template-columns: repeat(3, 1fr); } .grid.two { grid-template-columns: 1fr 1fr; } }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+  .card h3 { margin: 0 0 6px; font-size: 18px; }
+  .card p { margin: 0; color: var(--muted); font-size: 16px; }
+  .num { font: 500 13px "JetBrains Mono", monospace; color: var(--ai-ink); display: block; margin-bottom: 10px; }
+
+  ol.steps { padding-left: 22px; margin: 0; max-width: 64ch; }
+  ol.steps li { margin-bottom: 12px; }
+  code, .mono { font-family: "JetBrains Mono", monospace; font-size: 0.88em; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+  .note { border-left: 3px solid var(--ae); padding: 4px 0 4px 16px; color: var(--muted); max-width: 64ch; margin-top: 20px; }
+
+  .dl { display: grid; gap: 12px; }
+  @media (min-width: 720px) { .dl { grid-template-columns: repeat(3, 1fr); } }
+  .dl a, .dl div { display: block; padding: 20px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); text-decoration: none; }
+  .dl a:hover { border-color: var(--ink); }
+  .dl b { display: block; font-size: 17px; }
+  .dl span { color: var(--muted); font-size: 14px; }
+  .dl .soon { opacity: .65; }
+
+  details { border-bottom: 1px solid var(--line); padding: 14px 0; max-width: 72ch; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { color: var(--muted); margin: 10px 0 0; }
+
+  footer { padding: 40px 0 56px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  footer p { margin: 0 0 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="./"><img src="img/alleyoop-plugin-icon-256.png" alt="">Alleyoop</a>
+    <nav><a href="#download">Download</a><a href="#how">How</a><a href="https://github.com/dobotibi/alleyoop">GitHub</a></nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1>Figma <span class="ae">passes</span>.<br>Illustrator <span class="ai">dunks</span>.</h1>
+      <p class="lead">Your Figma frames become clean, layered .ai files. Ready for After Effects. One click, also for many frames.</p>
+      <div class="cta">
+        <a class="btn primary" href="#download">Download Dunk for Mac</a>
+        <a class="btn" href="#figma">Get the Figma plugin</a>
+      </div>
+      <p class="small">Free and open source. Needs Adobe Illustrator 2024–2026.</p>
+    </div>
+    <div class="pass" aria-label="Figma sends the frame to Dunk, Dunk lets Illustrator build the file">
+      <svg viewBox="0 0 400 210" role="img">
+        <title>Figma to Dunk to Illustrator</title>
+        <path d="M60 140 C 120 20, 280 20, 340 140" fill="none" stroke="var(--ae)" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>
+        <circle cx="200" cy="50" r="5" fill="var(--ai)"/>
+        <line x1="200" y1="50" x2="150" y2="50" stroke="var(--ai)" stroke-width="2"/>
+        <line x1="200" y1="50" x2="250" y2="50" stroke="var(--ai)" stroke-width="2"/>
+        <circle cx="150" cy="50" r="4" fill="var(--surface)" stroke="var(--ai)" stroke-width="2"/>
+        <circle cx="250" cy="50" r="4" fill="var(--surface)" stroke="var(--ai)" stroke-width="2"/>
+        <g font-family="Instrument Sans, sans-serif" font-weight="600" font-size="15" fill="var(--ink)" text-anchor="middle">
+          <rect x="14" y="140" width="92" height="52" rx="12" fill="var(--bg)" stroke="var(--line)"/>
+          <text x="60" y="171">Figma</text>
+          <rect x="154" y="140" width="92" height="52" rx="12" fill="var(--ink)"/>
+          <text x="200" y="171" fill="var(--bg)">Dunk</text>
+          <rect x="294" y="140" width="92" height="52" rx="12" fill="var(--bg)" stroke="var(--line)"/>
+          <text x="340" y="171">Illustrator</text>
+        </g>
+        <path d="M106 166 H 150 M246 166 H 290" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#a)"/>
+        <defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/></marker></defs>
+      </svg>
+      <div class="cap"><span>plugin</span><span>your computer</span><span>.ai file</span></div>
+    </div>
+  </div>
+
+  <section class="story" id="why">
+    <h2>Why I made it</h2>
+    <p>I am an art director. Almost every week I send Figma designs to animators. And every time it was the same story.</p>
+    <p>Export a PDF. Open it in Illustrator. Delete the clipping masks nobody asked for, the black masks, the frame clips. Rename every layer, because they are all called "Group". Then export a separate SVG, because the text came out outlined.</p>
+    <p>It took a lot of time. With complex or raster graphics it often went wrong. And with ten frames it was a nightmare. So I built this, for me and for my animators.</p>
+  </section>
+
+  <section id="how">
+    <h2>What you get</h2>
+    <div class="grid three">
+      <div class="card"><span class="num">01</span><h3>One layer per element</h3><p>Every element of the frame is its own top-level layer, with its Figma name. After Effects sees them as separate layers.</p></div>
+      <div class="card"><span class="num">02</span><h3>Clean masks</h3><p>The useless clipping masks go away. Empty groups too. Real masks stay, and they get a clear name.</p></div>
+      <div class="card"><span class="num">03</span><h3>Text your way</h3><p>Editable, outlined, or both. With both, the outlined one is visible and the editable one waits hidden under it.</p></div>
+      <div class="card"><span class="num">04</span><h3>Many frames at once</h3><p>Select ten frames, get ten .ai files. Into your default folder, or you pick the folder at the end.</p></div>
+      <div class="card"><span class="num">05</span><h3>Safe names</h3><p>Layer names without accents and odd characters, so expressions and scripts in After Effects don't break.</p></div>
+      <div class="card"><span class="num">06</span><h3>Stays on your computer</h3><p>Nothing goes to the internet. The plugin talks only to Dunk, on your own machine.</p></div>
+    </div>
+    <p class="note">One rule for layers: the direct children of the frame become the layers. If you want a group split into its children, start its name with <code>+</code>, for example <code>+Icons</code>.</p>
+  </section>
+
+  <section id="download">
+    <h2>Download Dunk</h2>
+    <p style="max-width:62ch">Dunk is the small helper app. It sits in your menu bar and does the Illustrator part. You need it, because a Figma plugin can't write .ai files by itself.</p>
+    <div class="dl">
+      <a href="https://github.com/dobotibi/alleyoop/releases/latest/download/Dunk-mac-apple-silicon.dmg"><b>Mac, Apple silicon</b><span>M1, M2, M3, M4 · .dmg</span></a>
+      <a href="https://github.com/dobotibi/alleyoop/releases/latest/download/Dunk-mac-intel.dmg"><b>Mac, Intel</b><span>older Macs · .dmg</span></a>
+      <div class="soon"><b>Windows</b><span>in testing, coming soon</span></div>
+    </div>
+
+    <h2 style="margin-top:48px">Install, in 4 steps</h2>
+    <ol class="steps">
+      <li>Open the .dmg and drag <b>Dunk</b> to <b>Applications</b>.</li>
+      <li>Dunk is not signed yet, so the first time macOS stops it. Open <b>System Settings → Privacy &amp; Security</b>, scroll down and click <b>Open Anyway</b>. You do this only once.</li>
+      <li>Start Dunk. A small icon appears in the menu bar.</li>
+      <li>On the first job macOS asks if Dunk can control Adobe Illustrator. Click <b>Allow</b>.</li>
+    </ol>
+    <p class="note">Why not signed? Signing costs a yearly fee, and this is a free side project. The code is open on <a href="https://github.com/dobotibi/alleyoop">GitHub</a>, so you can check what it does.</p>
+  </section>
+
+  <section id="figma">
+    <h2>Use it in Figma</h2>
+    <ol class="steps">
+      <li>Install <b>Alleyoop</b> from the Figma Community and open it.</li>
+      <li>Select one or more frames.</li>
+      <li>Choose the text mode and where to save.</li>
+      <li>Click <b>Send to Illustrator</b>. The files land in <span class="mono">Desktop/Alleyoop</span>.</li>
+    </ol>
+    <p class="note">In After Effects, import the .ai as <b>Composition – Retain Layer Sizes</b>. Every layer comes in as its own layer.</p>
+  </section>
+
+  <section id="faq">
+    <h2>Questions</h2>
+    <details><summary>The plugin says "Dunk is not running"</summary><p>Start Dunk from Applications. If it still doesn't connect, open the Dunk menu and click Diagnostics. It writes a short report.</p></details>
+    <details><summary>What doesn't work perfectly?</summary><p>Background blur and some effects are exported as images. A Figma mask on frame level can't always stay a mask, the plugin warns you before. Multi-line text is one text frame per line.</p></details>
+    <details><summary>Does it work in the browser version of Figma?</summary><p>The desktop app is recommended. Some browsers block a website from talking to an app on your computer.</p></details>
+    <details><summary>Which Illustrator?</summary><p>Illustrator 2024, 2025 or 2026. If you have more versions, you can pick one in the Dunk menu.</p></details>
+    <details><summary>Something broke. What now?</summary><p>Please open an <a href="https://github.com/dobotibi/alleyoop/issues">issue on GitHub</a>. Every error message ends with the path of the log file, attach it. I read every one.</p></details>
+  </section>
+
+  <footer>
+    <p>Made by <a href="https://github.com/dobotibi">Tibor Dobozi</a>, an art director in Budapest. Is it useful for you? I'm really curious, tell me on GitHub.</p>
+    <p>Free, MIT license. · <a href="privacy.html">Privacy</a></p>
+    <p>Adobe Illustrator and After Effects are trademarks of Adobe. Figma is a trademark of Figma, Inc. Not affiliated with either.</p>
+  </footer>
+</div>
+</body>
+</html>
