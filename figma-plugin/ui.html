@@ -297,6 +297,7 @@ if (typeof module !== "undefined") module.exports = { makeZip };
       emptyList: 'Select one or more frames (FRAME, COMPONENT, INSTANCE or a section).',
       elems: '{n} elements',
       warnCount: '{n} warnings',
+      warnCount1: '1 warning',
       send: 'Send to Illustrator ({n} frames)',
       zip: 'Download ZIP',
       cancel: 'Cancel (after the current frame)',
@@ -313,6 +314,7 @@ if (typeof module !== "undefined") module.exports = { makeZip };
       errPrefix: '✗ error',
       cancelled: 'cancelled',
       warningsSuffix: ' ({n} warnings)',
+      warningsSuffix1: ' (1 warning)',
       chooseFolder: 'Choose a folder in the dialog…',
       savedTo: '✓ Saved to: {dir}',
       savedFallback: 'Saving was cancelled, the files were put in the default folder: {dir}',
@@ -438,7 +440,7 @@ if (typeof module !== "undefined") module.exports = { makeZip };
         var d = document.createElement('details');
         d.open = !!openFrames[f.id];
         d.addEventListener('toggle', function () { openFrames[f.id] = d.open; });
-        d.appendChild(mk('summary', '', t('warnCount', { n: f.warnings.length })));
+        d.appendChild(mk('summary', '', t(f.warnings.length === 1 && lang === 'en' ? 'warnCount1' : 'warnCount', { n: f.warnings.length })));
         var ul = document.createElement('ul');
         f.warnings.forEach(function (w) { var li = mk('li', w.level === 'warn' ? 'warn' : 'info', warnText(w, true));
           li.title = warnText(w, false);
@@ -554,7 +556,7 @@ if (typeof module !== "undefined") module.exports = { makeZip };
         if (batch) batch.successes++;
         var extra = j.report && j.report.warnings && j.report.warnings.length ? j.report.warnings.length : 0;
         setStatus(id, 'done', function () {
-          return t(j.staged ? 'doneAiStaged' : 'doneAi', { path: j.aiPath }) + (extra ? t('warningsSuffix', { n: extra }) : '');
+          return t(j.staged ? 'doneAiStaged' : 'doneAi', { path: j.aiPath }) + (extra ? t(extra === 1 && lang === 'en' ? 'warningsSuffix1' : 'warningsSuffix', { n: extra }) : '');
         });
       } else if (j && j.error) {
         var known = I18N.hu[j.error.code] !== undefined;
